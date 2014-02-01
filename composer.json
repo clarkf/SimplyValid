@@ -1,0 +1,24 @@
+{
+    "name": "clarkf/simply-valid",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Clark Fischer",
+            "email": "clark.fischer@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "illuminate/database": "~4.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~3.7",
+        "squizlabs/php_codesniffer": "~1.5",
+        "phpmd/phpmd": "~1.5"
+    },
+    "autoload": {
+        "psr-0": {
+            "SimplyValid": "src"
+        }
+    }
+}
