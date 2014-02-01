@@ -159,6 +159,14 @@ class ModelTest extends TestCase
 
         $this->assertCount(1, $errors);
     }
+
+    public function testErrorsShouldAlsoReturnErrors()
+    {
+        $model = new ConcreteMOdel;
+        $model->valid();
+
+        $this->assertSame($model->getMessageBag(), $model->errors());
+    }
 }
 
 class ConcreteModel extends Model {

@@ -128,4 +128,16 @@ abstract class Model extends Eloquent implements MessageProviderInterface
 
         return $this->errors;
     }
+
+    /**
+     * Get the error message bag
+     *
+     * @return MessageBag the message bag
+     *
+     * @see getMessageBag()
+     */
+    public function errors()
+    {
+        return $this->getMessageBag();
+    }
 }
