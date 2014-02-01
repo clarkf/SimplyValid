@@ -9,12 +9,16 @@
     ],
     "minimum-stability": "stable",
     "require": {
-        "illuminate/database": "~4.1"
+        "illuminate/support": "~4.1",
+        "illuminate/database": "~4.1",
+        "illuminate/validation": "~4.1"
     },
     "require-dev": {
         "phpunit/phpunit": "~3.7",
         "squizlabs/php_codesniffer": "~1.5",
-        "phpmd/phpmd": "~1.5"
+        "phpmd/phpmd": "~1.5",
+        "illuminate/foundation": "~4.1",
+        "mockery/mockery": "~0.8"
     },
     "autoload": {
         "psr-0": {
