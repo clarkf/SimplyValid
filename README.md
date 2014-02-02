@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/clarkf/SimplyValid.png)](https://travis-ci.org/clarkf/SimplyValid)
 [![Coverage Status](https://coveralls.io/repos/clarkf/SimplyValid/badge.png)](https://coveralls.io/r/clarkf/SimplyValid)
+[![Latest Stable Version](https://poser.pugx.org/clarkf/simply-valid/version.png)](https://packagist.org/packages/clarkf/simply-valid)
 
   Automagic validation for your [Eloquent](http://laravel.com/docs/eloquent)
 models.
@@ -14,7 +15,7 @@ Add `clarkf/simply-valid` to your `composer.json`:
 ```JSON
 {
     "require": {
-        "clarkf/simply-valid": "@dev-master"
+        "clarkf/simply-valid": ">= 1.0"
     }
 }
 ```
