@@ -70,11 +70,12 @@ class ValidityObserverTest extends TestCase
     {
         $observer = new ValidityObserver;
         $model = new ArrayModel;
+        $phpunit = $this;
 
         Event::listen(
             "eloquent.errors: ".get_class($model),
-            function ($passedModel, $errors) use($model) {
-                $this->assertSame($model, $passedModel);
+            function ($passedModel, $errors) use($model, $phpunit) {
+                $phpunit->assertSame($model, $passedModel);
             }
         );
 
