@@ -16,103 +16,41 @@ abstract class Model extends Eloquent implements MessageProviderInterface
     protected $errors;
 
     /**
+     * Boot the model
+     *
+     * @return void
+     */
+    public static function boot()
+    {
+        parent::boot();
+
+
+        static::registerModelEvent('errors', function ($model, $errors) {
+            $model->setMessageBag($errors);
+        });
+        static::observe(new ValidityObserver);
+    }
+
+    /**
      * Get computed validation rules.  By default, we use $this->rules.
      *
      * @return array Validation rules
      */
-    protected function getValidationRules()
+    public function getValidationRules()
     {
         return $this->rules;
     }
 
     /**
-     * Build a validator
+     * Set the underlying error message bag
      *
-     * @return Validator A validator instance
-     *
-     * @see buildValidator()
-     */
-    public function makeValidator()
-    {
-        return $this->buildValidator(
-            $this->getAttributes(),
-            $this->getValidationRules()
-        );
-    }
-
-    /**
-     * Build the validator.  Override this to use a custom class
-     *
-     * @param array $attributes The model's attributes
-     * @param array $rules      The rules to enforce
-     *
-     * @return Validator A validator instance
-     *
-     * @see makeValidator()
-     */
-    protected function buildValidator(array $attributes, array $rules)
-    {
-        return Validator::make($attributes, $rules);
-    }
-
-    /**
-     * Determine if the model is valid
-     *
-     * @return boolean true if the model is valid
-     */
-    public function valid()
-    {
-        $validator = $this->makeValidator();
-
-        if ($validator->passes()) {
-            return true;
-        }
-
-        $this->errors = $validator->errors();
-
-        return false;
-    }
-
-    /**
-     * Determine if the model is invalid
-     *
-     * @return boolean true if the model is invalid
-     */
-    public function invalid()
-    {
-        return !$this->valid();
-    }
-
-    /**
-     * Save the model after validation
-     *
-     * @param array $options Options
-     *
-     * @return boolean true if the model was saved, false otherwise
-     */
-    public function save(array $options = array())
-    {
-        if ($this->valid()) {
-            return parent::save($options);
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * Save the model, or throw an exception if it wasn't saved
-     *
-     * @param array $options Options
+     * @param MessageBag $bag The bag
      *
      * @return void
-     * @throws SimplyValid\Exception\InvalidModelException If the model is
-     *     invalid
      */
-    public function saveOrFail(array $options = array())
+    public function setMessageBag(MessageBag $bag)
     {
-        if (!$this->save($options)) {
-            throw new InvalidModelException($this);
-        }
+        $this->errors = $bag;
     }
 
     /**

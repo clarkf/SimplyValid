@@ -5,6 +5,7 @@ namespace SimplyValid\Test;
 use Illuminate\Container\Container;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Validation\Factory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Events\Dispatcher;
 use Mockery as m;
 
@@ -27,6 +28,8 @@ class TestCase extends \PHPUnit_Framework_TestCase
         });
 
         $this->app->instance('translator', $this->getTranslator());
+
+        Model::setEventDispatcher($this->app['events']);
     }
 
     protected function getTranslator()

@@ -5,12 +5,20 @@ namespace SimplyValid\Test;
 
 use PHPUnit_Framework_TestCase;
 use SimplyValid\Model;
-use SimplyValid\Exception\InvalidModelException;
-use Illuminate\Validation\Validator;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\MessageBag;
 use Mockery as m;
 
 class ModelTest extends TestCase
 {
+    public function setup()
+    {
+        parent::setup();
+
+        ConcreteModel::flushEventListeners();
+        ConcreteModel::boot();
+    }
+
     public function testItShouldExtendEloquentModel()
     {
         $this->assertInstanceOf("Illuminate\Database\Eloquent\Model", new ConcreteModel);
@@ -21,151 +29,48 @@ class ModelTest extends TestCase
         $this->assertInstanceOf("Illuminate\Support\Contracts\MessageProviderInterface", new ConcreteModel);
     }
 
-    public function testItShouldBeAbleToGenerateAValidator()
+    public function testItShouldAlwaysProvideMessageBag()
+    {
+        $this->assertInstanceOf(
+            "Illuminate\Support\MessageBag",
+            (new ConcreteModel)->getMessageBag()
+        );
+    }
+
+    public function testErrorsShouldProxyToMessageBag()
     {
         $model = new ConcreteModel;
-        $this->assertInstanceOf("Illuminate\Validation\Validator", $model->makeValidator());
+        $this->assertEquals($model->getMessageBag(), $model->errors());
     }
 
-    public function testItShouldAllowCustomValidators()
-    {
-        $model = new CustomValidatorModel;
-        $this->assertInstanceOf('SimplyValid\Test\CustomValidator', $model->makeValidator());
-    }
-
-    public function testValidatorShouldHaveProperAttributes()
+    public function testItShouldStoreErrors()
     {
         $model = new ConcreteModel;
-        $model->test = "hello";
-        $validator = $model->makeValidator();
-        $data = $validator->getData();
+        $bag = new MessageBag;
 
-        $this->assertEquals('hello', $data['test']);
+
+        $this->app['events']->fire('eloquent.errors: ' . get_class($model), array($model, $bag));
+
+        $this->assertSame($bag, $model->getMessageBag());
     }
 
-    public function testValidatorShouldHaveRules()
+    public function testInvalidShouldNotSave()
     {
         $model = new ConcreteModel;
-        $validator = $model->makeValidator();
-        $rules = $validator->getRules();
 
-        $this->assertEquals('required', $rules['name'][0]);
-    }
-
-    public function testValidatorShouldHaveDynamicRules()
-    {
-        $model = new DynamicModel;
-        $validator = $model->makeValidator();
-        $rules = $validator->getRules();
-
-        $this->assertEquals('required', $rules['name'][0]);
-    }
-
-    public function testValidShouldReturnFalseIfInvalid()
-    {
-        $model = new ConcreteModel;
-        $this->assertFalse($model->valid());
-    }
-
-    public function testInvalidShouldReturnTrueIfInvalid()
-    {
-        $model = new ConcreteModel;
-        $this->assertTrue($model->invalid());
-    }
-
-    public function testValidShouldReturnTrueIfValid()
-    {
-        $model = new ConcreteModel(array('name' => 'hello'));
-        $this->assertTrue($model->valid());
-    }
-
-    public function testInvalidShouldReturnFalseIfValid()
-    {
-        $model = new ConcreteModel(array('name' => 'hello'));
-        $this->assertFalse($model->invalid());
-    }
-
-    public function testSavingWhenInvalidDoesntSave()
-    {
-        $model = new ConcreteModel;
-        $this->assertTrue($model->invalid());
         $model->save();
 
         $this->assertEquals(0, $model->inserted);
     }
 
-    public function testSavingWhenInvalidReturnsFalse()
+    public function testValidShouldSave()
     {
-        $model = new ConcreteModel;
-        $this->assertTrue($model->invalid());
-        $this->assertFalse($model->save());
-    }
+        $model = new ConcreteMOdel;
+        $model->name = "Hello";
 
-    public function testSavingWhenValidWillSave()
-    {
-        $model = new ConcreteModel;
-        $model->name = "Hello World";
-        $this->assertTrue($model->valid());
         $model->save();
 
         $this->assertEquals(1, $model->inserted);
-    }
-
-    public function testSavingWhenValidReturnsTrue()
-    {
-        $model = new ConcreteModel;
-        $model->name = "Hello World";
-        $this->assertTrue($model->valid());
-        $this->assertTrue($model->save());
-    }
-
-    /**
-     * @expectedException SimplyValid\Exception\InvalidModelException
-     */
-    public function testSaveOrFailWhenInvalidThrows()
-    {
-        $model = new ConcreteModel;
-        $model->saveOrFail();
-    }
-
-    public function testSaveOrFailWhenInvalidThrowsWithModel()
-    {
-        $model = new ConcreteModel;
-        try {
-            $model->saveOrFail();
-        } catch (InvalidModelException $e) {
-            $this->assertSame($model, $e->getModel());
-        }
-    }
-
-    public function testSaveOrFailWhenValidDoesntThrow()
-    {
-        $model = new ConcreteModel(array('name' => 'hello'));
-        $model->saveOrFail();
-    }
-
-    public function testGetMessageBagShouldBeAMessageBag()
-    {
-        $model = new ConcreteModel;
-
-        $this->assertInstanceOf('Illuminate\Support\MessageBag', $model->getMessageBag());
-    }
-
-    public function testValidShouldProvideErrors()
-    {
-        $model = new ConcreteModel;
-        $model->valid();
-        $errors = $model->getMessageBag();
-
-        $this->assertCount(1, $errors);
-    }
-
-    public function testErrorsShouldAlsoReturnErrors()
-    {
-        $model = new ConcreteMOdel;
-        $model->valid();
-
-        $this->assertSame($model->getMessageBag(), $model->errors());
     }
 }
 
@@ -190,26 +95,4 @@ class ConcreteModel extends Model {
         $mock = m::mock('Illuminate\Database\Eloquent\Builder');
         return $mock;
     }
-}
-
-class DynamicModel extends Model {
-    protected function getValidationRules()
-    {
-        return array(
-            'name' => 'required'
-        );
-    }
-}
-
-class CustomValidatorModel extends Model
-{
-    protected function buildValidator(array $attributes, array $rules)
-    {
-        return new CustomValidator();
-    }
-}
-
-class CustomValidator extends Validator
-{
-    public function __construct() {}
 }
