@@ -31,10 +31,8 @@ class ModelTest extends TestCase
 
     public function testItShouldAlwaysProvideMessageBag()
     {
-        $this->assertInstanceOf(
-            "Illuminate\Support\MessageBag",
-            (new ConcreteModel)->getMessageBag()
-        );
+        $model = new ConcreteModel;
+        $this->assertInstanceOf("Illuminate\Support\MessageBag", $model->getMessageBag());
     }
 
     public function testErrorsShouldProxyToMessageBag()
