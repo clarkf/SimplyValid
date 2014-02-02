@@ -83,12 +83,12 @@ class ConcreteModel extends Model {
 
     protected function updateTimestamps() {}
 
-    protected function performInsert() {
+    protected function performInsert(Builder $query) {
         $this->inserted += 1;
         return true;
     }
 
-    public function newQuery()
+    public function newQuery($excludeDeleted = true)
     {
         $mock = m::mock('Illuminate\Database\Eloquent\Builder');
         return $mock;
