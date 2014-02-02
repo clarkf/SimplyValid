@@ -54,11 +54,12 @@ class ValidityObserverTest extends TestCase
     {
         $observer = new ValidityObserver;
         $model = new ArrayModel;
+        $phpunit = $this;
 
         Event::listen(
             "eloquent.errors: ".get_class($model),
-            function ($model, $errors) {
-                $this->assertInstanceOf('Illuminate\Support\MessageBag', $errors);
+            function ($model, $errors) use($phpunit) {
+                $phpunit->assertInstanceOf('Illuminate\Support\MessageBag', $errors);
             }
         );
 

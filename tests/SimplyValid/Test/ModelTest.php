@@ -7,6 +7,7 @@ use PHPUnit_Framework_TestCase;
 use SimplyValid\Model;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\MessageBag;
+use Illuminate\Database\Eloquent\Builder;
 use Mockery as m;
 
 class ModelTest extends TestCase
